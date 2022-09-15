@@ -8,6 +8,10 @@ class ecd_pulse_two_mode:
                  param_file = None, 
                  storage1_params = None,
                  storage2_params = None, 
+                 betas = None, 
+                 gammas = None,
+                 phis = None, 
+                 thetas = None,
                  qubit_params = None, 
                  alpha_CD =30, 
                  kappa1 = 0.5e-6, # T1 for both modes is 2ms
@@ -31,12 +35,12 @@ class ecd_pulse_two_mode:
                         
         qubit_params : {'unit_amp': 0.5, 'sigma': 6, 'chop': 4} #parameters for qubit pi pulse.
         '''
-        self.param_file = param_file # for loading parameters
-        self.betas = None
-        self.gammas = None
-        self.phis = None
-        self.thetas = None
-        self.load_params()
+        #self.param_file = param_file # for loading parameters
+        self.betas = betas
+        self.gammas = gammas
+        self.phis = phis
+        self.thetas = thetas
+        #self.load_params()
         
         self.kappa1 = kappa1
         self.kappa2 = kappa2
@@ -206,7 +210,7 @@ class qutip_sim_two_mode:
     
     def __init__(self, n_q, n_c1, n_c2, chi = None,
                  alpha1 = [], alpha2 = [], qubit_pulse = [],
-                 sim_params = None, states_filename = 'states store'):
+                 sim_params = None, save_states = False, states_filename = 'states store'):
         '''
         n_q, n_c = # of levels in qubit, cavity
         Assumes n_c1 = n_c2
@@ -248,6 +252,7 @@ class qutip_sim_two_mode:
         self.c_ops = []
         
         self.states_filename = states_filename
+        self.save_states= save_states
         
     
     def get_basic_ops(self): 
@@ -391,7 +396,8 @@ class qutip_sim_two_mode:
              self.H.append(i)
             
         self.output = mesolve(self.H, initial , t_list, self.c_ops, [], options =opts)        
-        qsave(self.output.states, self.states_filename)
+        if self.save_states: 
+            qsave(self.output.states, self.states_filename)
         
         return None
     
@@ -414,7 +420,11 @@ class qutip_sim_two_mode:
         '''
         Given output of mesolve, outputs populations with qubit as ground
         '''
-        output_states = qload(self.states_filename)
+#         if self.save_states:
+#             output_states = qload(self.states_filename)
+        output_states = self.output.states
+        
+        
         fig, axs = plt.subplots(2,1, figsize=(10,8))
         probs = []
         times = [k/1000 for k in range(len(output_states))]
