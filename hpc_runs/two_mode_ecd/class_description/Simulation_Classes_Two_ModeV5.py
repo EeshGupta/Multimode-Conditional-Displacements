@@ -361,6 +361,8 @@ class qutip_sim_two_mode:
         gamma_relax= 1/T1
         gamma_echo = 1/Techo
         gamma_phi = gamma_echo - (gamma_relax/2)
+        gamma_total = gamma_phi
+        
         if thermal:
             # Adding thermal cntribution
             gamma_qubit = 1/self.T1qubit
