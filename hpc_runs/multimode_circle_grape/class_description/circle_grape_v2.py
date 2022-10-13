@@ -1,7 +1,24 @@
 # The time dependence of the blockade drive is rotated out.
 from itertools import product
+%matplotlib inline
+import os
+import sys
+import inspect
 import numpy as np
-from qutip import *
+from scipy.special import factorial
+import h5py
+from quantum_optimal_control.helper_functions.grape_functions import *
+from quantum_optimal_control.main_grape.grape import Grape
+
+data_path = 'C:/Users\Eesh Gupta\Documents\RU Research\Chakram'
+#data_path
+initial_pulse = '../pulses/example_pulses/transmon_cat_initial_pulse.h5'
+from h5py import File
+import matplotlib.pyplot as plt
+from pylab import*
+from qutip import*
+
+from scipy import interpolate
 
 #V1 : Given By Vatsan
 
@@ -254,7 +271,7 @@ class multimode_circle_grape_optimal_control:
         # #Defining states to include in the drawing of occupation
         if plot_only_g:
             states_draw_list = np.arange(self.mnum**self.mmnum) 
-            state_indices  = [arg for arg in product(arange(self.mnum),repeat = self.mmnum)]
+            state_indices  = [arg for arg in product(np.arange(self.mnum),repeat = self.mmnum)]
   
             states_draw_names = []
             for ii in range(len(states_draw_list)):
