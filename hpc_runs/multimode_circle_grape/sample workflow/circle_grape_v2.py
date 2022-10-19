@@ -11,7 +11,7 @@ from quantum_optimal_control.main_grape.grape import Grape
 from itertools import product
 import itertools
 
-data_path = 'C:/Users\Eesh Gupta\Documents\RU Research\Chakram'
+data_path = '/home/eag190/Multimode-Conditional-Displacements/hpc_runs/multimode_circle_grape/sample workflow/data'
 #data_path
 initial_pulse = '../pulses/example_pulses/transmon_cat_initial_pulse.h5'
 from h5py import File
@@ -193,7 +193,7 @@ class multimode_circle_grape_optimal_control:
                             convergence = {}, reg_coeffs = {},
                             plot_only_g = True,
                             states_forbidden_list = [],initial_guess = None, 
-                            file_name = "test",data_path="test",specify_state_amplitudes = False):
+                            file_name = "test",data_path="test",specify_state_amplitudes = False, save = True):
    
         Hops = self.controlHs()
         H0 = self.H_rot()
@@ -288,7 +288,8 @@ class multimode_circle_grape_optimal_control:
                              draw=[states_draw_list, states_draw_names], state_transfer=state_transfer, use_gpu=False,
                              sparse_H=False, show_plots=True, Taylor_terms=taylor_terms, method='Adam', initial_guess=initial_guess,
                              maxA=ops_max_amp, reg_coeffs=reg_coeffs, dressed_info=dressed_info, 
-                             file_name=file_name, data_path=data_path)
+                             file_name=file_name, data_path=data_path, save = save)
+        return ss
 
     def plot_optimal_control(self,scales = [4367,4367,81.1684054679128, 81.1684054679128],pad_FFT = 3,filename = None,lim_scale=1.0):
         
