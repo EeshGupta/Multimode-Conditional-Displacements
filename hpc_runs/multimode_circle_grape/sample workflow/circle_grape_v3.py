@@ -110,17 +110,17 @@ class multimode_circle_grape_optimal_control:
             H0 += 2* np.pi/2.0*(np.kron(chi_mat, (self.M_zs[ii])))          # chi a^dag a sigma_z term
             H0 += 2* np.pi/2.0*alpha*(np.kron(chi_mat, (self.M_xs[ii])))    # constant real displacement
         
-        if not self.add_disp_kerr:pass
-        else:
-            Hnl = 0
-            for ii,chi in enumerate(chis):
-                Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha**3*(np.kron(self.I_q, self.M_xs[ii]))
-                Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha**2*(np.kron(self.I_q, self.a_s[ii] @ self.a_s[ii] \
-                                                                 +self.adag_s[ii] @ self.adag_s[ii]))         
-                Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha*(np.kron(self.I_q, self.adag_s[ii] @ self.adag_s[ii] @ self.a_s[ii] \
-                                       + self.adag_s[ii] @ self.a_s[ii] @ self.a_s[ii]))
-                Hnl+= 2*np.pi/2.0*kappas[ii]*4*alpha**2*(np.kron(self.I_q, self.M_zs[ii])) 
-            H0 += Hnl
+#         if not self.add_disp_kerr:pass
+#         else:
+#             Hnl = 0
+#             for ii,chi in enumerate(chis):
+#                 Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha**3*(np.kron(self.I_q, self.M_xs[ii]))
+#                 Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha**2*(np.kron(self.I_q, self.a_s[ii] @ self.a_s[ii] \
+#                                                                  +self.adag_s[ii] @ self.adag_s[ii]))         
+#                 Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha*(np.kron(self.I_q, self.adag_s[ii] @ self.adag_s[ii] @ self.a_s[ii] \
+#                                        + self.adag_s[ii] @ self.a_s[ii] @ self.a_s[ii]))
+#                 Hnl+= 2*np.pi/2.0*kappas[ii]*4*alpha**2*(np.kron(self.I_q, self.M_zs[ii])) 
+#             H0 += Hnl
            
         return (H0)
 
