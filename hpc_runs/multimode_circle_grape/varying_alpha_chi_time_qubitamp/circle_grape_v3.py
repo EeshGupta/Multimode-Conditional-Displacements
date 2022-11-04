@@ -44,7 +44,6 @@ class multimode_circle_grape_optimal_control:
 #To Do : Clean up this matrix math by modularizing (either create general N level pauli x,y,z or use position and momentum
 # Representations that ALec uses)
 ###
-    
     def initialize_operators(self):
         '''
         Create qubit and mode versions of pauli/creation/annhilation operators
@@ -57,7 +56,7 @@ class multimode_circle_grape_optimal_control:
         # Mode Pauli Operatirs
         self.M_x = np.diag(np.sqrt(np.arange(1, self.mode_levels)), 1)+np.diag(np.sqrt(np.arange(1, self.mode_levels)), -1)
         self.M_y = (0+1j) * (np.diag(np.sqrt(np.arange(1, self.mode_levels)), 1)-np.diag(np.sqrt(np.arange(1, self.mode_levels)), -1))
-        self.M_z = np.diag(np.arange(0, self.mode_levels))   # adag a 
+        self.M_z = np.diag(np.arange(0, self.mode_levels))
         self.I_m = np.identity(self.mode_levels)
         self.am =  np.diag(np.sqrt(np.arange(1, self.mode_levels)), 1)
         self.amdag =  np.diag(np.sqrt(np.arange(1, self.mode_levels)), -1)
@@ -101,18 +100,18 @@ class multimode_circle_grape_optimal_control:
 
         H0 = 0
         for ii,chi in enumerate(chis):
-            chi_mat = chi*(self.Q_z/2)
-            #mode_ens = np.array([2*np.pi*mm*(mode_freq - 0.5*(mm-1)*kappas[ii]) for mm in np.arange(self.mnum)]) 
-            #H_m = np.diag(mode_ens)   #??
-            #ret = H_m*(ii==0) + self.I_m*(1-(ii==0))   #??
+            chi_mat = chi/2.0*self.Q_z
+            mode_ens = np.array([2*np.pi*mm*(mode_freq - 0.5*(mm-1)*kappas[ii]) for mm in np.arange(self.mnum)]) 
+            H_m = np.diag(mode_ens)
+            ret = H_m*(ii==0) + self.I_m*(1-(ii==0))
             for m in np.arange(1,self.mmnum):
-               # ret = np.kron(ret,H_m*(ii==m) + self.I_m*(1-(ii==m)))# ??
-         #   H0 += np.kron(self.I_q, ret)                                    #
-         #   H0 += 2* np.pi*(np.kron(chi_mat, (self.M_zs[ii])))          # chi a^dag a sigma_z term  # earlier there was pi/2 for some reason?
-            H0 += 2* np.pi*alpha*(np.kron(chi_mat, (self.M_xs[ii])))    # constant real displacement
+                ret = np.kron(ret,H_m*(ii==m) + self.I_m*(1-(ii==m)))
+            H0 += np.kron(self.I_q, ret)                                    #
+            H0 += 2* np.pi/2.0*(np.kron(chi_mat, (self.M_zs[ii])))          # chi a^dag a sigma_z term
+            H0 += 2* np.pi/2.0*alpha*(np.kron(chi_mat, (self.M_xs[ii])))    # constant real displacement
         
-       # if not self.add_disp_kerr:pass
-        #else:
+#         if not self.add_disp_kerr:pass
+#         else:
 #             Hnl = 0
 #             for ii,chi in enumerate(chis):
 #                 Hnl+= 2*np.pi/2.0*kappas[ii]*2*alpha**3*(np.kron(self.I_q, self.M_xs[ii]))
@@ -196,7 +195,7 @@ class multimode_circle_grape_optimal_control:
 # Main function
     def run_optimal_control(self,state_transfer = True, initial_states = [0], target_states = [2], 
                             total_time = 25000.0, steps = 800,max_amp = 15e-6, 
-                            taylor_terms = None,is_dressed=False, 
+                            taylor_terms = None,is_dressed=True, 
                             convergence = {}, reg_coeffs = {},
                             plot_only_g = True,
                             states_forbidden_list = [],initial_guess = None, 
