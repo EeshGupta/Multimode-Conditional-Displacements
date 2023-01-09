@@ -29,6 +29,7 @@ def ring_up_smoothstep(length):
 
 
 def rotate(theta, phi=0, sigma=8, chop=6, dt=1):
+    #returns a normalize gaussian wave 
     wave = gaussian_wave(sigma=sigma, chop=chop)
     energy = np.trapz(wave, dx=dt)
     amp = 1 / energy
@@ -96,7 +97,7 @@ class FakeQubit:
     def __init__(self, unit_amp, sigma, chop, detune=0):
         self.pulse = FakePulse(unit_amp=unit_amp, sigma=sigma, chop=chop, detune=detune)
         #calculating conversion between DAC and Hamiltonian drive amplitude
-        pi = rotate(np.pi, phi=0, sigma=sigma, chop=chop, dt=1)
+        pi = rotate(np.pi, phi=0, sigma=sigma, chop=chop, dt=1) # returns 
         self.Omega_m_MHz = 1e3*np.real(np.max(np.abs(pi)))/unit_amp/2/np.pi
 
 

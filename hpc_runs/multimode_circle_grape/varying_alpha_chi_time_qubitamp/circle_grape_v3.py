@@ -22,7 +22,7 @@ from qutip import*
 from scipy import interpolate
 
 #V1 : Given By Vatsan
-#V3: Make sure that Grape now returns filename and that the following class has a local variable called filename; this avoids manual input
+#V3: Made sure that Grape now returns filename and that the following class has a local variable called filename; this avoids manual input; 
 
 class multimode_circle_grape_optimal_control:
     
@@ -130,13 +130,13 @@ class multimode_circle_grape_optimal_control:
         '''
         controlHs = []  
         
-       # for each mode in cavity
-        for m in np.arange(self.mmnum):
+       # for each mode in cavity   #doesn't make sense, same qubit drive for each mode
+#         for m in np.arange(self.mmnum):
         
-            XI = np.kron(self.Q_x, self.I_mm)
-            YI = np.kron(self.Q_y, self.I_mm)
-            controlHs.append(XI)
-            controlHs.append(YI)
+        XI = np.kron(self.Q_x, self.I_mm)
+        YI = np.kron(self.Q_y, self.I_mm)
+        controlHs.append(XI)
+        controlHs.append(YI)
 
         return controlHs
     
