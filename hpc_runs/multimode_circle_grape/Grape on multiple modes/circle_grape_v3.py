@@ -101,7 +101,7 @@ class multimode_circle_grape_optimal_control:
         H0 = 0
         for ii,chi in enumerate(chis):
             chi_mat = chi/2.0*self.Q_z
-            mode_ens = np.array([2*np.pi*mm*(mode_freq - 0.5*(mm-1)*kappas[ii]) for mm in np.arange(self.mnum)]) 
+            mode_ens = np.array([2*np.pi*mm*(mode_freq - 0.5*(mm-1)*kappas[ii]) for mm in np.arange(self.mnum)]) #each level has a diff frequency (if anharmonic i guess)
             H_m = np.diag(mode_ens)
             ret = H_m*(ii==0) + self.I_m*(1-(ii==0))
             for m in np.arange(1,self.mmnum):

@@ -6,8 +6,8 @@ import inspect
 import numpy as np
 from scipy.special import factorial
 import h5py
-from quantum_optimal_control2.helper_functions.grape_functions import *
-from quantum_optimal_control2.main_grape.grape import Grape
+from quantum_optimal_control.helper_functions.grape_functions import *
+from quantum_optimal_control.main_grape.grape import Grape
 from itertools import product
 import itertools
 
@@ -137,12 +137,12 @@ class multimode_circle_grape_optimal_control:
         controlHs.append(YI)
         
         #mode ops
-        for m in np.arange(self.mmnum):  
-            IX = np.kron(self.I_q, self.M_xs[m])
-            IY = np.kron(self.I_q, self.M_ys[m])
+#         for m in np.arange(self.mmnum):  
+#             IX = np.kron(self.I_q, self.M_xs[m])
+#             IY = np.kron(self.I_q, self.M_ys[m])
             
-            controlHs.append(IX)
-            controlHs.append(IY)
+#             controlHs.append(IX)
+#             controlHs.append(IY)
 
         return controlHs
     
@@ -299,6 +299,8 @@ class multimode_circle_grape_optimal_control:
 
         states_forbidden_list = states_forbidden_list
         print(states_forbidden_list)
+        print('Hops are' + str(np.shape(Hops)))
+        #print(Hops)
 
         ss = Grape(H0, Hops, Hnames, U, total_time, steps, psi0, convergence=convergence,
                              draw=[states_draw_list, states_draw_names], state_transfer=state_transfer, use_gpu=False,
