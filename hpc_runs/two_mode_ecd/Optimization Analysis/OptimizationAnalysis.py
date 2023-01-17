@@ -259,12 +259,14 @@ class OptimizationAnalysis:
         else:
             ax.plot(fidelities[-1], **kwargs)
 
-        # ax.set_xlabel("epoch", size=8)
-        # if log:
-        #    ax.set_ylabel("infidelity", size=8)
-        # else:
-        #    ax.set_ylabel("fidelity", size=8)
+        ax.set_xlabel("epoch", size=8)
+        if log:
+           ax.set_ylabel("infidelity", size=8)
+        else:
+           ax.set_ylabel("fidelity", size=8)
         fig.tight_layout()
+        
+        return fig
 
 #     def plot_best_fidelity(self, timestamp=None, fig=None, ax=None, log=True, **kwargs):
 #         fids = self.best_fidelities(timestamp)
