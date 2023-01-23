@@ -2,9 +2,8 @@ from DECD_pulseV2 import *
 from qutip import *
 import numpy as np
 
-#V3: changed how angles are loaded 
+#V3 : changed how angles are loaded 
 #V4: Adding time dependence to collapse operator decay rates
-#V5: Added thermal noise
 
 class ecd_pulse_two_mode: 
     
@@ -39,12 +38,17 @@ class ecd_pulse_two_mode:
                         
         qubit_params : {'unit_amp': 0.5, 'sigma': 6, 'chop': 4} #parameters for qubit pi pulse.
         '''
-        self.param_file = param_file # for loading parameters
-        self.betas = betas
-        self.gammas = gammas
-        self.phis = phis
-        self.thetas = thetas
-        self.load_params()
+      # for loading parameters
+        if param_file is not None: 
+            self.param_file = param_file
+            self.load_params()
+
+        else: #expects that param are specified directly            
+            self.betas = betas
+            self.gammas = gammas
+            self.phis = phis
+            self.thetas = thetas
+
         
         self.kappa1 = kappa1
         self.kappa2 = kappa2
@@ -105,18 +109,10 @@ class ecd_pulse_two_mode:
         Loads betas, thetas, phis
         '''
         params = np.loadtxt(self.param_file)
-        
-        if np.ndim(params) == 1: 
-            self.betas = np.asarray([complex(params[0], params[1])])
-            self.gammas =  np.asarray([complex(params[2], params[3])])
-            self.phis = np.asarray(params[4])
-            self.thetas = np.asarray(params[5])
-        else:
-            
-            self.betas = np.asarray([complex(params[0][i], params[1][i]) for i in range(len(params[0]))])
-            self.gammas =  np.asarray([complex(params[2][i], params[3][i]) for i in range(len(params[0]))])
-            self.phis = params[4]
-            self.thetas = params[5]
+        self.betas = np.asarray([complex(params[0][i], params[1][i]) for i in range(len(params[0]))])
+        self.gammas =  np.asarray([complex(params[2][i], params[3][i]) for i in range(len(params[0]))])
+        self.phis = params[4]
+        self.thetas = params[5]
         return None
     
     def get_pulses(self): 
@@ -362,44 +358,26 @@ class qutip_sim_two_mode:
         self.c_ops.append(term2)
         return None
     
-    def add_cavity_dephasing_for_given_mode(self, T1, Techo, alpha, mode_index = 1, thermal = False):
+    def add_cavity_dephasing_for_given_mode(self, T1, Techo, alpha, mode_index = 1):
         '''
         Adds dephasing noise for a given mode (transforming the cavity dephosing noise in displaced frame)
         '''
         gamma_relax= 1/T1
         gamma_echo = 1/Techo
         gamma_phi = gamma_echo - (gamma_relax/2)
-        gamma_total = gamma_phi
-        
-        if thermal:
-            # Adding thermal cntribution
-            gamma_qubit = 1/self.T1qubit
-            n_thermal_qubit = 1.2    #???   https://arxiv.org/pdf/2010.16382.pdf
-            gamma_thermal = gamma_qubit*( 
-                                np.real(
-                                    np.sqrt(
-                                        (1 + (1.0j * self.chi/gamma_qubit))**2
-                                        +
-                                        (4.0j * self.chi * n_thermal_qubit / gamma_qubit)
-                                    )
-                                    -
-                                    1
-                                ) / 2
-                                )
-            gamma_total += gamma_thermal
         
         
         #In transforming a -> a + alpha, the term a^dag a can be broken down as 
         # (a+ alpha)(a^dag + alpha^star) = a^adag + alpha^star * a + alpha* adag + |alpha|^2
         # the latter term can be ignored cuz equal to identity
         if mode_index == 1: 
-            term1 = gamma_total*tensor(self.identity_q, self.num_c, self.identity_c)
-            term2 = gamma_total*tensor(self.identity_q, self.a_c  , self.identity_c)
-            term3 = gamma_total*tensor(self.identity_q, self.adag_c  , self.identity_c)
+            term1 = gamma_phi*tensor(self.identity_q, self.num_c, self.identity_c)
+            term2 = gamma_phi*tensor(self.identity_q, self.a_c  , self.identity_c)
+            term3 = gamma_phi*tensor(self.identity_q, self.adag_c  , self.identity_c)
         else: #mode index = 2
-            term1 = gamma_total*tensor(self.identity_q, self.identity_c, self.num_c)
-            term2 = gamma_total*tensor(self.identity_q, self.identity_c, self.a_c )
-            term3 = gamma_total*tensor(self.identity_q, self.identity_c, self.adag_c)
+            term1 = gamma_phi*tensor(self.identity_q, self.identity_c, self.num_c)
+            term2 = gamma_phi*tensor(self.identity_q, self.identity_c, self.a_c )
+            term3 = gamma_phi*tensor(self.identity_q, self.identity_c, self.adag_c)
         
         #add to collapse operator list
         self.c_ops.append(term1)

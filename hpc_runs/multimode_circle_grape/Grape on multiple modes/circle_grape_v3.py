@@ -205,9 +205,9 @@ class multimode_circle_grape_optimal_control:
         H0 = self.H_rot()
         ops_max_amp = []
         Hnames = []
-        for ii in np.arange(self.mmnum):
-            ops_max_amp.extend([max_amp*2*np.pi, max_amp*2*np.pi])
-            Hnames.extend(['cavity'+str(ii)+'_x', 'cavity'+str(ii)+'_y'])
+        #for ii in np.arange(self.mmnum):
+        ops_max_amp.extend([max_amp*2*np.pi, max_amp*2*np.pi])
+        Hnames.extend(['qubit'+str('')+'_x', 'qubit'+str('')+'_y'])
         print([len(Hops), len(ops_max_amp), len(Hnames)])
         U = []
         psi0 = []

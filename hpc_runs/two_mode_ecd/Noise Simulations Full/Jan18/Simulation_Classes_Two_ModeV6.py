@@ -262,6 +262,9 @@ class qutip_sim_two_mode:
                  [(self.chi2/2)*tensor(sigmaz(),  self.identity_c, self.adag_c), self.alpha2],
                  ] 
         self.c_ops = []
+        #other terms in the hamiltonian
+        self.add_mode_mode_coupling()
+        self.add_stark_shift()
         
         self.states_filename = states_filename
         self.save_states= save_states
@@ -371,10 +374,10 @@ class qutip_sim_two_mode:
         gamma_phi = gamma_echo - (gamma_relax/2)
         gamma_total = gamma_phi
         
-        if thermal:
+        if thermal: # But why this when this is qubit?
             # Adding thermal cntribution
             gamma_qubit = 1/self.T1qubit
-            n_thermal_qubit = 1.2    #???   https://arxiv.org/pdf/2010.16382.pdf
+            n_thermal_qubit = 1.2    #???  see last para of https://arxiv.org/pdf/2010.16382.pdf
             gamma_thermal = gamma_qubit*( 
                                 np.real(
                                     np.sqrt(
@@ -511,3 +514,4 @@ class qutip_sim_two_mode:
         plt.tight_layout()
         fig.savefig(figname, dpi = 1000)
         return None
+
