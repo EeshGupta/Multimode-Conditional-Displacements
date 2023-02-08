@@ -1,0 +1,3 @@
+task,bo_fidelity,only ecd,mode coupling,transmon relax,transmon dephasing,cavities relax,cavities dephasing,cavities dephasing with thermal
+,,,,,,,,
+1,0.9992699,0.9910528016958396,0.9944750251393454,0.9774262794063657,0.9903637313758216,0.9963772800036145,0.9924481687011738,0.9983305616590512
