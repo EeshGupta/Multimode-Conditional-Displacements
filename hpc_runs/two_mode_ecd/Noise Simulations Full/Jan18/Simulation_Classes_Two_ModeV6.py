@@ -263,7 +263,7 @@ class qutip_sim_two_mode:
                  ] 
         self.c_ops = []
         #other terms in the hamiltonian
-        self.add_mode_mode_coupling()
+        self.add_bare_qubit_mode_coupling()
         self.add_stark_shift()
         
         self.states_filename = states_filename
@@ -325,6 +325,17 @@ class qutip_sim_two_mode:
         
         return None
     
+    def add_dummy(self):
+        '''
+        Will add identity as collapse op which will make solver use the solver corresponding to collapse ops. 
+        But it will not add noise
+        '''
+        term = 0*tensor(self.identity_q, self.identity_c, self.identity_c)
+        #print('oi')
+        self.c_ops.append(term)
+        
+        return None
+    
     def add_qubit_relaxation(self, T1 = 30e+3):
         '''
         qubit relaxation (T1 in nanoseconds)
@@ -365,7 +376,7 @@ class qutip_sim_two_mode:
         self.c_ops.append(term2)
         return None
     
-    def add_cavity_dephasing_for_given_mode(self, T1, Techo, alpha, mode_index = 1, thermal = False):
+    def add_cavity_dephasing_for_given_mode(self, T1, Techo, alpha, mode_index = 1, thermal = False, T1qubit =None):
         '''
         Adds dephasing noise for a given mode (transforming the cavity dephosing noise in displaced frame)
         '''
@@ -376,14 +387,28 @@ class qutip_sim_two_mode:
         
         if thermal: # But why this when this is qubit?
             # Adding thermal cntribution
-            gamma_qubit = 1/self.T1qubit
+            #T1qubit = 
+            gamma_qubit = 1/T1qubit
             n_thermal_qubit = 1.2    #???  see last para of https://arxiv.org/pdf/2010.16382.pdf
-            gamma_thermal = gamma_qubit*( 
+            if mode_index == 1: 
+                gamma_thermal = gamma_qubit*( 
+                                    np.real(
+                                        np.sqrt(
+                                            (1 + (1.0j * self.chi1/gamma_qubit))**2
+                                            +
+                                            (4.0j * self.chi1 * n_thermal_qubit / gamma_qubit)
+                                        )
+                                        -
+                                        1
+                                    ) / 2
+                                    )
+            elif mode_index == 2: 
+                gamma_thermal = gamma_qubit*( 
                                 np.real(
                                     np.sqrt(
-                                        (1 + (1.0j * self.chi/gamma_qubit))**2
+                                        (1 + (1.0j * self.chi2/gamma_qubit))**2
                                         +
-                                        (4.0j * self.chi * n_thermal_qubit / gamma_qubit)
+                                        (4.0j * self.chi2 * n_thermal_qubit / gamma_qubit)
                                     )
                                     -
                                     1
@@ -412,13 +437,14 @@ class qutip_sim_two_mode:
         return None
         
     
-    def add_cavity_dephasing(self, T1_mode1 = 10e+6, Techo_mode1 = 10e+6, T1_mode2 = 10e+6, Techo_mode2 = 10e+6 ):
+    def add_cavity_dephasing(self, T1_mode1 = 10e+6, Techo_mode1 = 10e+6, T1_mode2 = 10e+6, Techo_mode2 = 10e+6,
+                             thermal = False, T1qubit = None ):
         '''
         qubit dephasing (T1, Techo in nanoseconds)
         '''
        
-        self.add_cavity_dephasing_for_given_mode( T1_mode1, Techo_mode1, self.alpha1, mode_index = 1)
-        self.add_cavity_dephasing_for_given_mode( T1_mode2, Techo_mode2, self.alpha2, mode_index = 2)        
+        self.add_cavity_dephasing_for_given_mode( T1_mode1, Techo_mode1, self.alpha1, mode_index = 1, thermal = thermal, T1qubit = T1qubit)
+        self.add_cavity_dephasing_for_given_mode( T1_mode2, Techo_mode2, self.alpha2, mode_index = 2, thermal = thermal, T1qubit = T1qubit)        
         return None
     
     
@@ -458,7 +484,22 @@ class qutip_sim_two_mode:
         '''
         dot final state after evolution with target
         '''
-        return self.dot(self.output.states[-1], target)
+        state = self.output.states[-1]
+        result = 0
+        
+        if (state.type == 'ket') and (target.type == 'ket'):
+            result = self.dot(state, target)
+        
+        elif (state.type == 'oper') and (target.type == 'ket'): #density matrix alert
+            target_rho= target*target.dag()
+            result = np.sqrt(self.dot(state, target_rho)) # Hilbert schmidt prod is enough, no need for squaring (try to do this for pure states and you'll get why sqrt used here)
+            
+        elif (state.type == 'oper') and (target.type == 'oper'): #density matrix alert
+            #target_rho= target*target.dag()
+            result = np.sqrt(self.dot(state, target_rho)) # Hilbert schmidt prod is enough, no need for squaring (try to do this for pure states and you'll get why sqrt used here)
+        
+        
+        return result
     
     
     def plot_populations(self, figname = 'figure'):
@@ -473,7 +514,7 @@ class qutip_sim_two_mode:
         fig, axs = plt.subplots(2,1, figsize=(10,8))
         probs = []
         times = [k/1000 for k in range(len(output_states))]
-        max_num_levels = 3 # to be shown on the plot
+        max_num_levels = 6 # to be shown on the plot
         
         #qubit grounded
         for i in range(max_num_levels):
