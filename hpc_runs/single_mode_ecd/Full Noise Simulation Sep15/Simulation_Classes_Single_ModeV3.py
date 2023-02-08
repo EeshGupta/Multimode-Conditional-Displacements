@@ -304,14 +304,48 @@ class qutip_sim_single_mode:
         #In transforming a -> a + alpha, the term a^dag a can be broken down as 
         # (a+ alpha)(a^dag + alpha^star) = a^adag + alpha^star * a + alpha* adag + |alpha|^2
         # the latter term can be ignored cuz equal to identity
-        term1 = gamma_phi*tensor(self.identity_q, self.num_c)
-        term2 = gamma_phi*tensor(self.identity_q, self.a_c)
-        term3 = gamma_phi*tensor(self.identity_q, self.adag_c )
-        
-        #add to collapse operator list
+        term1 = np.sqrt(gamma_phi)*tensor(self.identity_q, self.num_c) 
         self.c_ops.append(term1)
-        self.c_ops.append([term2, np.conjugate(self.alpha)]) # adding the time dependent coefficients
+        
+        
+        term2 = np.sqrt(gamma_phi)*tensor(self.identity_q, self.a_c)
+        self.c_ops.append([term2, np.conjugate(self.alpha)])
+        
+        term3 = np.sqrt(gamma_phi)*tensor(self.identity_q, self.adag_c )
         self.c_ops.append([term3, self.alpha])
+        
+        #dissipators
+        term4 = gamma_phi * lindblad_dissipator(tensor(self.identity_q, self.num_c), # a+ a,  a
+                                                 tensor(self.identity_q, self.a_c))
+        coeff =  np.array([ (np.abs(k))**2 for k in self.alpha])
+        self.c_ops.append([term4,coeff])
+#         print([ (np.abs(k))**2 for k in self.alpha])
+#         print(term4)
+        
+        term5 =gamma_phi * lindblad_dissipator(tensor(self.identity_q, self.num_c),  # a+ a,  a+
+                                                     tensor(self.identity_q, self.adag_c))
+        self.c_ops.append([term5, np.array([ (np.abs(k))**2 for k in self.alpha])])
+        
+        term6 =gamma_phi * lindblad_dissipator( tensor(self.identity_q, self.a_c),   #  a,  a+ a
+                                                tensor(self.identity_q, self.num_c))
+        self.c_ops.append([term6, np.array([ (np.abs(k))**2 for k in self.alpha])])
+        
+        term7 =gamma_phi * lindblad_dissipator( tensor(self.identity_q, self.adag_c), #  a+,  a+ a
+                                                tensor(self.identity_q, self.num_c))
+        self.c_ops.append([term7, np.array([ (np.abs(k))**2 for k in self.alpha])])
+        
+        term8 = gamma_phi * lindblad_dissipator( tensor(self.identity_q, self.a_c), #  a,  a+
+                                                tensor(self.identity_q, self.adag_c))
+        self.c_ops.append([term8, np.array([ k*k for k in np.conjugate(self.alpha)])])
+        
+        term9 = gamma_phi * lindblad_dissipator( tensor(self.identity_q, self.adag_c), #  a+,  a
+                                                tensor(self.identity_q, self.a_c))
+        self.c_ops.append([term9, np.array([ k*k for k in self.alpha])])
+        
+#         #add to collapse operator list
+#         self.c_ops.append(term1)
+#         self.c_ops.append([term2, np.conjugate(self.alpha)]) # adding the time dependent coefficients
+#         self.c_ops.append([term3, self.alpha])
         
         return None
     
@@ -340,6 +374,8 @@ class qutip_sim_single_mode:
             qsave(self.output.states, self.states_filename)
         
         return None
+    
+    
     
     def dot(self, state1, state2):
         '''
