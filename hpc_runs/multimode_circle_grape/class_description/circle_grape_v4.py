@@ -372,6 +372,45 @@ class multimode_circle_grape_optimal_control:
        
         plt.tight_layout()
         
+        
+    def qutip_mesolve_new(self,start_state,filename = None):
+        if filename is None: 
+            filename = self.filename
+        ss = np.zeros(self.qnum*(self.mnum)**self.mmnum,dtype=complex)
+        ss[:len(start_state)] = start_state  # g0
+        psi0 = Qobj(ss)
+        rho0 = psi0*psi0.dag()
+        
+        
+        H = self.total_H(filename)
+        tlist = self.tlist
+#         if self.t1params is None:
+#             c_ops = []
+#         else:
+#             gamma = 1/self.t1params['T1_q']*1e-3
+#             gamma_phi = 1/self.t1params['T2_q']*1e-3- 1/2/self.t1params['T1_q']*1e-3
+#             n_thq =  self.t1params['nth_q']
+#             c_ops = gamma*(1+ n_thq)*lindblad_dissipator(self.aqmm) + gamma*(n_thq)*lindblad_dissipator(self.aqmm.dag())
+#             c_ops += gamma_phi*lindblad_dissipator(self.aqmm.dag()*self.aqmm) 
+#             kappa_ms = 1/array(self.t1params['T1_ms'])*1e-3
+#             n_thms =  array(self.t1params['nth_ms'])
+#             for ii,a in enumerate(self.ams):
+#                 c_ops += kappa_ms[ii]*(1+n_thms[ii])*lindblad_dissipator(a) +  kappa_ms[ii]*(n_thms[ii])*lindblad_dissipator(a.dag()) 
+
+           
+#         H0 = Qobj(self.H_rot())
+#         e_vecs = H0.eigenstates()[1]
+#         self.e_ops = [e_vec*e_vec.dag() for e_vec in e_vecs]
+#         self.n_mms = array([[expect(Qobj(np.kron(self.I_q,self.M_zs[ii])),e_vec) for e_vec in e_vecs] for ii in np.arange(self.mmnum)])
+#         self.n_qs = array([expect(Qobj(np.kron(self.Q_z,self.I_mm)), e_vec) for e_vec in e_vecs])
+#         self.nqinit = expect(Qobj(np.kron(self.Q_z,self.I_mm)), psi0)
+#         self.nmminit = array([expect(Qobj(np.kron(self.I_q,self.M_zs[ii])),psi0) for ii in np.arange(self.mmnum)])
+        
+        nsteps = 1e+4
+        opts = Options(store_states=True, store_final_state=True, nsteps = nsteps)
+        out = mesolve(H, rho0, tlist, options =opts)
+        return tlist, out    
+        
     def qutip_mesolve(self,start_state,filename = None):
         if filename is None: 
             filename = self.filename
@@ -409,7 +448,7 @@ class multimode_circle_grape_optimal_control:
         out = mesolve(H, rho0, tlist, c_ops=c_ops,e_ops = self.e_ops)
         return tlist, out
     
-    def plot_mesolve(self,filename = None,show_low_only=True,MAX = 2,start_state = [1,0,0,0,0]):
+    def plot_mesolve(self,filename = None,show_low_only=True,MAX = 2,start_state = [1,0,0,0,0], title = ''):
         if filename is None: 
             filename = self.filename
         
